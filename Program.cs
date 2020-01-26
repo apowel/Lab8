@@ -13,10 +13,11 @@ namespace Lab8
             Console.Write("Welcome to the class. ");
             while (again == true)
             {
-                Console.WriteLine("Which student would you like to learn more about? (enter a number 1-20): ");
+                Console.WriteLine("Which student would you like to learn more about? " +
+                    "(enter a number 1-" + studentDirectory.Directory.Count() + "): ");
                 Student selectedStudent = SelectStudent(studentDirectory);
-                Console.WriteLine("Student " + selectedStudent.id + " is" + selectedStudent.name + ".");
-                Console.WriteLine(@"What would you like to know about this student? enter ""hometown"", or ""favorite food"": ");
+                Console.WriteLine("What would you like to know about this student? " +
+                    @"enter ""hometown"", or ""favorite food"": ");
                 SelectInfo(selectedStudent);
                 again = Again();
             }
@@ -25,26 +26,64 @@ namespace Lab8
 
         public static Student SelectStudent(StudentDirectory studentDirectory)
         {
-            if (Int32.TryParse(Console.ReadLine(), out int idInput) && idInput > 0 && idInput < 21)
-            { 
-                return studentDirectory.GetStudent(idInput);
+            string idInput = Console.ReadLine().ToLower();
+            int id;
+            try
+            {
+                id = Int32.Parse(idInput);
             }
-            else
-            { 
-                Console.WriteLine("That student does not exist.  Please try again. (enter a number 1-20): ");
+            catch(FormatException e)
+            {
+                Console.WriteLine(e.StackTrace);
+                Console.WriteLine("enter a number 1-"+ studentDirectory.Directory.Count());
+                return SelectStudent(studentDirectory);
+            }
+            catch(OverflowException e)
+            {
+                Console.WriteLine(e.StackTrace);
+                Console.WriteLine(e.Message);
+                Console.WriteLine("enter a number 1-" + studentDirectory.Directory.Count());
+                return SelectStudent(studentDirectory);
+            }
+
+            try
+            {
+                Console.WriteLine("Student " + id + " is " + 
+                studentDirectory.GetStudent(id).Name + ".");
+                return studentDirectory.GetStudent(id);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.StackTrace);
+                Console.WriteLine("That's not a student, try again.");
                 return SelectStudent(studentDirectory);
             }
         }
         public static void SelectInfo(Student selectedStudent)
         {
-            string info = Console.ReadLine().ToLower().Trim();
+            string info;
+            try
+            {
+                info = Console.ReadLine().ToLower().Trim();
+                //This should never trigger an exception, but users figure out how to break stuff.
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                Console.WriteLine(e.StackTrace);
+                Console.WriteLine("That input broke something.");
+                throw;
+            }
+            
             if (info == "hometown")
             {
-                Console.WriteLine(selectedStudent.name + " is from " + selectedStudent.homeTown + ".");
+                Console.WriteLine(selectedStudent.Name + " is from " + 
+                    selectedStudent.HomeTown + ".");
             }
             else if (info == "favorite food")
             {
-                Console.WriteLine("The favorite food of " + selectedStudent.name + " is " + selectedStudent.food);
+                Console.WriteLine("The favorite food of " + selectedStudent.Name + 
+                    " is " + selectedStudent.Food);
             }
             else
             {
@@ -54,8 +93,20 @@ namespace Lab8
         }
         public static bool Again()
         {
-            Console.WriteLine(@"Would you like to know more about another student? (enter ""yes"" or ""no"")");
-            string againInput = Console.ReadLine().ToLower().Trim();
+            Console.WriteLine("Would you like to know more about another student? " +
+                @"(enter ""yes"" or ""no"")");
+            string againInput = "";
+            try
+            {
+                againInput = Console.ReadLine().ToLower().Trim();
+                //This should never trigger an exception, but users figure out how to break stuff.
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.StackTrace);
+                Console.WriteLine("That input broke something.");
+                return Again();
+            }
             if (againInput == "yes")
             {
                 return true;
@@ -72,40 +123,26 @@ namespace Lab8
 
         public class Student
         {
-            public int id { get; set; }
-            public string name { get; set; }
-            public string homeTown { get; set; }
-            public string food { get; set; }
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public string HomeTown { get; set; }
+            public string Food { get; set; }
         }
 
         public class StudentDirectory
         {
-            public List<Student> studentDirectory = new List<Student>()
+            public List<Student> Directory = new List<Student>()
             {
-                new Student() { id = 1, name = "Name1", homeTown = "City A", food = "Apple"},
-                new Student() { id = 2, name = "Name2", homeTown = "City B", food = "Banana"},
-                new Student() { id = 3, name = "Name3", homeTown = "City C", food = "Fish"},
-                new Student() { id = 4, name = "Name4", homeTown = "City D", food = "Sushi"},
-                new Student() { id = 5, name = "Name5", homeTown = "City E", food = "Hamburgers"},
-                new Student() { id = 6, name = "Name6", homeTown = "City F", food = "Spaghetti"},
-                new Student() { id = 7, name = "Name7", homeTown = "City G", food = "Beans"},
-                new Student() { id = 8, name = "Name8", homeTown = "City H", food = "Taco Bell"},
-                new Student() { id = 9, name = "Name9", homeTown = "City I", food = "Bread"},
-                new Student() { id = 10, name = "Name10", homeTown = "City J", food = "BBQ"},
-                new Student() { id = 11, name = "Name11", homeTown = "City A", food = "Steak"},
-                new Student() { id = 12, name = "Name12", homeTown = "City B", food = "Pho"},
-                new Student() { id = 13, name = "Name13", homeTown = "City C", food = "Soup"},
-                new Student() { id = 14, name = "Name14", homeTown = "City D", food = "Pizza"},
-                new Student() { id = 15, name = "Name15", homeTown = "City E", food = "Tacos"},
-                new Student() { id = 16, name = "Name16", homeTown = "City F", food = "Dumplings"},
-                new Student() { id = 17, name = "Name17", homeTown = "City G", food = "PB&J"},
-                new Student() { id = 18, name = "Name18", homeTown = "City H", food = "Blueberries"},
-                new Student() { id = 19, name = "Name19", homeTown = "City I", food = "Apple"},
-                new Student() { id = 20, name = "Name20", homeTown = "City J", food = "Chicken"},
+                new Student() { Id = 1, Name = "Jake Collins", HomeTown = "Corona, CA", Food = "Sushi"},
+                new Student() { Id = 2, Name = "Andrew Waltman", HomeTown = "Grand Rapids, MI", Food = "Burgers"},
+                new Student() { Id = 3, Name = "Albert Ngoudjou", HomeTown = "Bafoussam", Food = "Lasagna"},
+                new Student() { Id = 4, Name = "Tommy Waalkes", HomeTown = "Raleigh, NC", Food = "Chicken Curry"},
+                new Student() { Id = 5, Name = "Austin Powel", HomeTown = "Blissfield, MI", Food = "Spaghetti"},
+                new Student() { Id = 6, Name = "Dylan Rule", HomeTown = "Newport, NH", Food = "Poutine"},
             };
             public Student GetStudent(int id)
             {
-                return studentDirectory.FirstOrDefault(e => e.id == id);
+                return Directory.FirstOrDefault(e => e.Id == id);
             }
         }
     }
